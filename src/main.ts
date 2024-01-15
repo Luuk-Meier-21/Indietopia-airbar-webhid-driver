@@ -1,70 +1,66 @@
-import {GAxis} from "./utils";
+import {createGestureTouchReferences} from "./gesture";
+import {GestureTouchClient} from "./client";
 
-let dualTouchDistArray = new Array(3);
+const maxX = 1400;
+const maxY = 900;
 
-const screenSizeX = 1400;
-const screenSizeY = 900;
+const touchClient = new GestureTouchClient(
+  createGestureTouchReferences(maxX, maxY)
+);
 
-let touches = 0;
-
-const x = new GAxis(12, screenSizeX, 4, 5);
-const y = new GAxis(7, screenSizeY, 6, 7);
-const w = new GAxis(1, screenSizeX, 8, 9);
-const h = new GAxis(1, screenSizeY, 10, 11);
-
-const x2 = new GAxis(11, screenSizeX, 13, 14);
-const y2 = new GAxis(7, screenSizeY, 15, 16);
-
-function updateDualTouchDistArray(newDist: number) {
-  dualTouchDistArray.shift();
-  dualTouchDistArray.push(newDist);
+enum TouchState {
+  NONE = "",
+  START = "touchstart",
+  MOVE = "touchmove",
+  END = "touchend",
 }
 
-function onCanvasDraw() {
-  background("transparent");
-  if (touches > 0) {
-    // 1 touch:
-    ellipse(x.lastValue, y.lastValue, 100, 100);
-    fill("blue");
+let preState: TouchState = TouchState.NONE;
+let endDebounceId: number = 0;
+
+let savedTouches: Touch[] = [];
+let savedTouchCount = 0;
+
+window.addEventListener(TouchState.START, (ev) => {
+  console.log(ev);
+});
+
+window.addEventListener(TouchState.MOVE, (ev) => {
+  savedTouches = ev.touches as unknown as Touch[];
+});
+
+window.addEventListener(TouchState.END, () => {
+  savedTouches = [];
+  savedTouchCount = 0;
+});
+
+function onInput(data: DataView) {
+  const touches = touchClient.calcAllTouches(data);
+  savedTouchCount = touchClient.calcTouchCount(data);
+
+  const dispatchState = (state: TouchState) => {
+    const event = new TouchEvent(state, {touches: touches});
+    dispatchEvent(event);
+    preState = TouchState.START;
+  };
+
+  // Start
+  if (preState === TouchState.NONE) {
+    dispatchState(TouchState.START);
+    return;
   }
-  if (touches > 1) {
-    // 2 touch:
-    ellipse(x2.lastValue, y2.lastValue, 100, 100);
-    fill("green");
-  }
-}
 
-function onGestureInput(data: DataView) {
-  touches = data.getUint8(0);
+  // End
+  clearTimeout(endDebounceId);
+  endDebounceId = setTimeout(() => {
+    dispatchState(TouchState.END);
+  }, 30);
 
-  const ax = x.calcValue(data);
-  const ay = y.calcValue(data);
-  const aw = w.calcValue(data);
-  const ah = h.calcValue(data);
-
-  const bx = x2.calcValue(data);
-  const by = y2.calcValue(data);
-
-  if (touches === 2) {
-    const touchDist = dist(ax, ay, bx, by);
-    updateDualTouchDistArray(touchDist);
-
-    const distOffset = 20;
-
-    const isAssending = dualTouchDistArray.every((dist, i) => {
-      const prevDist: number = dualTouchDistArray[i - 1];
-
-      return i === 0 || dist > prevDist + distOffset;
-    });
-    if (isAssending) {
-      console.log("HI");
-    }
-    // console.log(isAssending ? "Zooming out" : "zoomming in");
-  }
+  // Move
+  dispatchState(TouchState.MOVE);
 }
 
 // Event listeners
-
 document.addEventListener("p5-setup", async () => {
   const button = document.querySelector("button") as HTMLButtonElement;
 
@@ -86,15 +82,37 @@ document.addEventListener("p5-setup", async () => {
 
     device.addEventListener("inputreport", async (event) => {
       const {data} = event;
-      // debugInput(data, 0, 6);
 
-      onGestureInput(data);
+      onInput(data);
     });
   });
 });
 
-document.addEventListener("p5-draw", onCanvasDraw);
+function onCanvasDraw() {
+  background("red");
 
-navigator.hid.addEventListener("connect", (event: HIDConnectionEvent) => {
-  console.log(event);
-});
+  for (let i = 0; i < savedTouchCount; i++) {
+    const touch = savedTouches[i];
+
+    if (!touch) {
+      return;
+    }
+    console.log(touch);
+    ellipse(touch.screenX, touch.screenY, touch.radiusX, touch.radiusY);
+    fill(75 * i);
+  }
+
+  // background("transparent");
+  // if (touches > 0) {
+  //   // 1 touch:
+  //   ellipse(x.lastValue, y.lastValue, 100, 100);
+  //   fill("blue");
+  // }
+  // if (touches > 1) {
+  //   // 2 touch:
+  //   ellipse(x2.lastValue, y2.lastValue, 100, 100);
+  //   fill("green");
+  // }
+}
+
+document.addEventListener("p5-draw", onCanvasDraw);

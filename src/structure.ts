@@ -1,54 +1,57 @@
-// @ts-nocheck
-import {GAxis} from "./utils";
+// // @ts-nocheck
+// import {GAxis} from "./utils";
 
-// Interface for: one value from the HID input device
-interface HIDInputMetric {
-  get currentValue(): number;
-  calcValue: (data: DataView) => number;
-}
+// // Interface for: one value from the HID input device
+// interface HIDInputMetric {
+//   get currentValue(): number;
+//   calcValue: (data: DataView) => number;
+// }
 
-// Class implementing HIDInputMetric, calculates value based on 0 to 255 value and index of given max length.
-class CompositeDimension implements HIDInputMetric {
-  get currentValue(): number {}
-  calcValue(data: DataView): number {}
+// // Class implementing HIDInputMetric, calculates value based on 0 to 255 value and index of given max length.
+// class CompositeDimension implements HIDInputMetric {
+//   get currentValue(): number {}
+//   calcValue(data: DataView): number {}
 
-  constructor(
-    public clusterCount: number,
-    public valueByteOffset: number,
-    public indexByteOfsset: number
-  ) {}
-}
+//   constructor(
+//     public clusterCount: number,
+//     public valueByteOffset: number,
+//     public indexByteOfsset: number
+//   ) {}
+// }
 
-type RectBounds = {x: number; y: number; w: number; h: number};
+// type RectBounds = {x: number; y: number; w: number; h: number};
 
-interface HIDTouchBounds {
-  get currentValue(): RectBounds;
-  calcValue(): RectBounds;
-  calcToTouch(): Touch;
-}
+// interface HIDTouchBounds {
+//   get currentValue(): RectBounds;
+//   calcValue(): RectBounds;
+//   calcToTouch(): Touch;
+// }
 
-class GTouch implements HIDInputBounds {
-  get currentValue(): RectBounds {}
-  calcValue(): RectBounds {}
-  calcToTouch(): Touch {}
-}
+// class GTouch implements HIDInputBounds {
+//   get currentValue(): RectBounds {}
+//   calcValue(): RectBounds {}
+//   calcToTouch(): Touch {}
+// }
 
-// TouchBoundsListFactory
+// // TouchBoundsListFactory
 
-class GestureTouchClient {
-  constructor() {}
+// class GestureTouchClient {
+//   constructor() {}
 
-  getTouchList(): TouchList {}
-}
+//   getTouchList(): TouchList {}
+//   getTouchCount(): number {}
+// }
 
-type TouchEventType = "touchstart" | "touchcancel" | "touchmove" | "touchend";
+// type TouchEventType = "touchstart" | "touchcancel" | "touchmove" | "touchend";
 
-class GestureTouchEventDispatcher {
-  constructor() {}
+// class GestureTouchEventDispatcher {
+//   constructor() {}
 
-  dispatch(
-    eventType: TouchEventType,
-    touches: TouchList,
-    options?: Partial<TouchEvent> = {}
-  ): void {}
-}
+//   public dispatchCurrentInternal(eventType: TouchEventType) {}
+
+//   public dispatch(
+//     eventType: TouchEventType,
+//     touches: TouchList,
+//     options?: Partial<TouchEvent> = {}
+//   ): void {}
+// }
