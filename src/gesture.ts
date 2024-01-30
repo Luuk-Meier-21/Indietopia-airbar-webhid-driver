@@ -1,4 +1,4 @@
-import {HIDTouchReference, RectBounds} from "./client";
+import {HIDTouchConfiguration, RectBounds} from "./client";
 import {CompositeDimension} from "./dimension";
 
 export function createGestureTouchReferences(
@@ -9,18 +9,18 @@ export function createGestureTouchReferences(
     start?: number;
     offset?: number;
   }
-): GestureTouchReference[] {
+): GestureTouchConfiguration[] {
   const count = options?.count || 3;
   const start = options?.start || 4;
   const offset = options?.offset || 9;
 
   return Array.from(Array(count)).map((_, i) => {
     const byteOffset = start + offset * i;
-    return new GestureTouchReference(byteOffset, maxX, maxY);
+    return new GestureTouchConfiguration(byteOffset, maxX, maxY);
   });
 }
 
-export class GestureTouchReference implements HIDTouchReference {
+export class GestureTouchConfiguration implements HIDTouchConfiguration {
   private value: RectBounds = {x: 0, y: 0, w: 0, h: 0};
 
   constructor(
@@ -29,7 +29,7 @@ export class GestureTouchReference implements HIDTouchReference {
     public maxY: number
   ) {}
 
-  public get currentValue(): RectBounds {
+  public get lastValue(): RectBounds {
     return this.value;
   }
 

@@ -5,40 +5,29 @@ export interface HIDMetric {
 
 export type RectBounds = {x: number; y: number; w: number; h: number};
 
-export interface HIDTouchReference {
-  get currentValue(): RectBounds;
+export interface HIDTouchConfiguration {
+  get lastValue(): RectBounds;
   calcValue(data: DataView): RectBounds;
   calcToTouch(data: DataView): Touch;
 }
 
-export class GestureTouchClient {
-  constructor(public touchRefList: HIDTouchReference[]) {}
+// A client that calculates touch based on data and touchrefs
+export class TouchClient {
+  constructor(public touchRefList: HIDTouchConfiguration[]) {}
 
-  calcAllValues(data: DataView): RectBounds[] {
-    return this.touchRefList.map((ref: HIDTouchReference) =>
+  getRectBounds(data: DataView): RectBounds[] {
+    return this.touchRefList.map((ref: HIDTouchConfiguration) =>
       ref.calcValue(data)
     );
   }
 
-  calcAllTouches(data: DataView): Touch[] {
-    return this.touchRefList.map((ref: HIDTouchReference) =>
+  getTouches(data: DataView): Touch[] {
+    return this.touchRefList.map((ref: HIDTouchConfiguration) =>
       ref.calcToTouch(data)
     );
   }
 
-  calcTouchCount(data: DataView) {
+  getTouchCount(data: DataView) {
     return data.getUint8(0);
   }
 }
-
-// export class HIDTouchClient {
-//   constructor(offsetList: number[]) {}
-
-//   /**
-//    * Returns the `HIDTouchBounds`
-//    */
-//   getTouchBoundsFromOffset(data: DataView, offset: number): HIDTouchBounds {}
-
-//   getTouchList(): TouchList {}
-//   getTouchCount(): number {}
-// }
